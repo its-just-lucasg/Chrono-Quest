@@ -321,7 +321,7 @@ Joonie rewards you with a level-99 headbutt that vibrates the Chrono-Dial on the
     text: `*CHOO CHOO!* 🚂💨
 
 **Tommy** comes drifting sideways around the hallway rug like a caffeinated locomotive! {husband} laughs: "Watch out, Tommy Wommy is on the express track!"
-
+ 
 As Tommy zips past, he drops a shiny **Golden Choo-Choo Whistle** at your feet. With kinetic zoomie energy charging the room, the Chrono-Dial hums to life!`,
     choices: [
       { text: "☕ Gulp your fresh morning {drink}", tag: "+COFFEE", hideIfItem: "iced_coffee", next: "kitchen_prep" },

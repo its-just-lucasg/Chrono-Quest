@@ -1247,25 +1247,82 @@ class ChronoQuestGame {
       }).catch(() => {});
     }
 
-    // Retro Power-On Overlay & Audio Unlock (guarantees Title Screen music starts immediately on tap!)
+    // Retro Power-On Overlay & November 17, 2026 12:00 AM Spoiler-Free Time-Lock!
     const powerOverlay = document.getElementById("arcadePowerOverlay");
+    const promptBox = document.getElementById("powerOnPromptBox");
+    const lockBox = document.getElementById("timeLockBox");
+    const unlockTimestamp = new Date(2026, 10, 17, 0, 0, 0).getTime(); // Nov 17, 2026 12:00 AM
+
+    const checkAndShowTimeLock = () => {
+      if (!this.creatorBypassUnlocked && Date.now() < unlockTimestamp) {
+        if (promptBox) promptBox.style.display = "none";
+        if (lockBox) lockBox.style.display = "block";
+        if (powerOverlay) powerOverlay.style.cursor = "default";
+
+        const updateCountdown = () => {
+          const diff = unlockTimestamp - Date.now();
+          const el = document.getElementById("timeLockCountdown");
+          if (!el) return;
+          if (diff <= 0) {
+            if (this.timeLockTimer) clearInterval(this.timeLockTimer);
+            if (powerOverlay) powerOverlay.style.display = "none";
+            return;
+          }
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const mins = Math.floor((diff / (1000 * 60)) % 60);
+          const secs = Math.floor((diff / 1000) % 60);
+          el.textContent = `UNLOCKS IN: ${days}D ${hours}H ${mins}M ${secs}S`;
+        };
+        updateCountdown();
+        if (this.timeLockTimer) clearInterval(this.timeLockTimer);
+        this.timeLockTimer = setInterval(updateCountdown, 1000);
+      } else {
+        if (powerOverlay) powerOverlay.style.display = "none";
+      }
+    };
+
     const dismissPowerOverlay = () => {
+      if (lockBox && lockBox.style.display === "block") return;
       window.retroAudio.init();
       window.retroAudio.playSelect();
-      if (powerOverlay) powerOverlay.style.display = "none";
+      checkAndShowTimeLock();
     };
     if (powerOverlay) {
       powerOverlay.addEventListener("click", dismissPowerOverlay);
       powerOverlay.addEventListener("touchend", e => {
+        if (lockBox && lockBox.style.display === "block") return;
         e.preventDefault();
         dismissPowerOverlay();
       }, { passive: false });
     }
     window.addEventListener("keydown", () => {
-      if (powerOverlay && powerOverlay.style.display !== "none") {
+      if (powerOverlay && powerOverlay.style.display !== "none" && (!lockBox || lockBox.style.display === "none")) {
         dismissPowerOverlay();
       }
     }, { once: true });
+
+    // Secret creator bypass for Lucas: tap "🔒 CHRONO-LOCK ACTIVE // NO SPOILERS!" 5 times to test!
+    let secretTaps = 0;
+    const secretHdr = document.getElementById("timeLockSecretHeader");
+    if (secretHdr) {
+      const handleSecretTap = e => {
+        e.stopPropagation();
+        secretTaps++;
+        window.retroAudio.playHover();
+        if (secretTaps >= 5) {
+          this.creatorBypassUnlocked = true;
+          if (this.timeLockTimer) clearInterval(this.timeLockTimer);
+          window.retroAudio.playItemGet();
+          if (powerOverlay) powerOverlay.style.display = "none";
+        }
+      };
+      secretHdr.addEventListener("click", handleSecretTap);
+      secretHdr.addEventListener("touchend", e => {
+        e.preventDefault();
+        handleSecretTap(e);
+      }, { passive: false });
+    }
 
     // Header buttons
     document.getElementById("btnPhotoGallery").addEventListener("click", () => this.openModal("modalPhotoGallery"));

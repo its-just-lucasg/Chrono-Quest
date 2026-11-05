@@ -18,34 +18,29 @@ const N = {
 window.ZONE_SOUNDTRACKS = {
   // 1. TITLE & BIRTHDAY MORNING: Authentic 8-Bit "Happy Birthday to You" Waltz!
   happy_birthday: {
-    label: "✨ STARLIGHT TITLE SCREEN",
-    unitMs: 180, // Relaxed, breathing tempo (~83 BPM per quarter beat)
-    leadWave: "triangle", // Soft, warm tones without harsh edges
-    harmWave: "sine",     // Smooth ambient pad backing
+    label: "🎂 8-BIT HAPPY BIRTHDAY",
+    unitMs: 190,
+    leadWave: "square",
+    harmWave: "triangle",
     steps: [
-      // --- BAR 1: C Major (Warm Opening Arpeggio) ---
-      ["E5", "G4", "C3", 0, 2], ["G5", "C5", "_",  0, 2],
-      ["C6", "E5", "E3", 0, 2], ["B5", "D5", "_",  0, 2],
-      ["A5", "C5", "G3", 0, 2], ["G5", "B4", "_",  0, 2],
-      ["E5", "G4", "C3", 3, 2], ["D5", "F4", "_",  0, 2],
-
-      // --- BAR 2: A Minor (Gentle, Reflective Descent) ---
-      ["C5", "E4", "A2", 0, 2], ["E5", "A4", "_",  0, 2],
-      ["A5", "C5", "C3", 0, 2], ["G5", "B4", "_",  0, 2],
-      ["E5", "A4", "E3", 0, 2], ["D5", "G4", "_",  0, 2],
-      ["C5", "E4", "A2", 3, 2], ["B4", "D4", "_",  0, 2],
-
-      // --- BAR 3: F Major 7 (Dreamy, Floating Feel) ---
-      ["A4", "C4", "F2", 0, 2], ["C5", "E4", "_",  0, 2],
-      ["E5", "G4", "A2", 0, 2], ["F5", "A4", "_",  0, 2],
-      ["E5", "G4", "C3", 0, 2], ["D5", "F4", "_",  0, 2],
-      ["C5", "E4", "F2", 3, 2], ["D5", "F4", "_",  0, 2],
-
-      // --- BAR 4: G Dominant -> Quiet Resolution (Loops back to Bar 1) ---
-      ["D5", "G4", "G2", 0, 2], ["F5", "B4", "_",  0, 2],
-      ["G5", "D5", "B2", 0, 2], ["F5", "B4", "_",  0, 2],
-      ["E5", "G4", "D3", 0, 2], ["D5", "F4", "_",  0, 2],
-      ["C5", "E4", "G2", 3, 2], ["B4", "D4", "_",  0, 2]
+      // "Hap-py birth-day to you..."
+      ["C5", "E4", "C3", 1, 1], ["C5", "E4", "_",  0, 1],
+      ["D5", "F4", "G3", 2, 2], ["C5", "E4", "G3", 2, 2],
+      ["F5", "A4", "C3", 1, 2], ["E5", "G4", "G3", 2, 3], ["_", "_", "G3", 0, 1],
+      // "Hap-py birth-day to you..."
+      ["C5", "E4", "G3", 1, 1], ["C5", "E4", "_",  0, 1],
+      ["D5", "F4", "G3", 2, 2], ["C5", "E4", "B2", 2, 2],
+      ["G5", "B4", "C3", 1, 2], ["F5", "A4", "F3", 2, 3], ["_", "_", "C3", 0, 1],
+      // "Hap-py birth-day dear Re-bec-ca..."
+      ["C5", "E4", "C3", 1, 1], ["C5", "E4", "_",  0, 1],
+      ["C6", "E5", "E3", 2, 2], ["A5", "C5", "F3", 1, 2],
+      ["F5", "A4", "C3", 2, 2], ["E5", "G4", "A3", 1, 2],
+      ["D5", "Fs4","D3", 2, 3], ["_",  "_",  "A3", 0, 1],
+      // "Hap-py birth-day to you!" + Chiptune Arpeggio Turnaround
+      ["Bb5","D5", "Bb2",1, 1], ["Bb5","D5", "_",  0, 1],
+      ["A5", "C5", "F3", 2, 2], ["F5", "A4", "A3", 2, 2],
+      ["G5", "B4", "G3", 1, 2], ["F5", "A4", "F3", 2, 2],
+      ["A5", "C5", "C3", 1, 1], ["C6", "F5", "F3", 2, 2], ["_", "_", "_", 0, 1]
     ]
   },
 
@@ -236,99 +231,27 @@ window.ZONE_SOUNDTRACKS = {
 class RetroAudioEngine {
   constructor() {
     this.ctx = null;
-    this.masterGain = null;
     this.enabled = true;      // SFX enabled
     this.musicEnabled = true; // Background chiptune music enabled
     this.currentTrackName = "happy_birthday";
     this.bgmTimeout = null;
     this.stepIndex = 0;
     this.isPlayingSong = false;
-    this.isPageHidden = false;
     this.songTimeouts = [];
-    this.bindLifecycleEvents();
-  }
-
-  getOutNode() {
-    return this.masterGain || (this.ctx ? this.ctx.destination : null);
-  }
-
-  bindLifecycleEvents() {
-    const handleHide = () => {
-      this.isPageHidden = true;
-      this.stopMusicLoop();
-      this.stopSong();
-      if (this.masterGain && this.ctx) {
-        try {
-          this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
-        } catch (e) {}
-      }
-      if (this.ctx && this.ctx.state === "running") {
-        this.ctx.suspend().catch(() => {});
-      }
-    };
-
-    const handleShow = () => {
-      if (document.hidden) return;
-      this.isPageHidden = false;
-      if (this.masterGain && this.ctx) {
-        try {
-          this.masterGain.gain.setValueAtTime(1, this.ctx.currentTime);
-        } catch (e) {}
-      }
-      if (this.ctx && this.ctx.state === "suspended" && (this.musicEnabled || this.enabled)) {
-        this.ctx.resume().catch(() => {});
-      }
-      if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong && this.ctx) {
-        this.startMusic(this.currentTrackName);
-      }
-    };
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) handleHide();
-      else handleShow();
-    });
-    window.addEventListener("pagehide", handleHide);
-    document.addEventListener("freeze", handleHide);
-    // Unconditionally mute & suspend on window blur (locking phone screen or switching apps)
-    window.addEventListener("blur", handleHide);
-    window.addEventListener("focus", handleShow);
   }
 
   init() {
-    if (document.hidden) return;
-    this.isPageHidden = false;
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
-        this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.setValueAtTime(1, this.ctx.currentTime);
-        this.masterGain.connect(this.ctx.destination);
       }
     }
-    if (this.ctx) {
-      if (this.masterGain) {
-        try {
-          this.masterGain.gain.setValueAtTime(1, this.ctx.currentTime);
-        } catch (e) {}
-      }
-      if (this.ctx.state === "suspended") {
-        try {
-          const buf = this.ctx.createBuffer(1, 1, 22050);
-          const src = this.ctx.createBufferSource();
-          src.buffer = buf;
-          src.connect(this.getOutNode());
-          src.start(0);
-        } catch (e) {}
-        this.ctx.resume().then(() => {
-          if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong && !this.isPageHidden) {
-            this.startMusic(this.currentTrackName);
-          }
-        }).catch(() => {});
-      }
-      if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong) {
-        this.startMusic(this.currentTrackName);
-      }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume();
+    }
+    if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong) {
+      this.startMusic(this.currentTrackName);
     }
   }
 
@@ -397,13 +320,7 @@ class RetroAudioEngine {
     this.currentTrackName = trackName;
 
     const scheduleNext = () => {
-      if (!this.musicEnabled || this.isPageHidden || document.hidden) return;
-      if (typeof document.hasFocus === "function" && !document.hasFocus()) {
-        this.isPageHidden = true;
-        this.stopMusicLoop();
-        if (this.ctx && this.ctx.state === "running") this.ctx.suspend().catch(() => {});
-        return;
-      }
+      if (!this.musicEnabled) return;
       if (this.isPlayingSong || !this.ctx || this.ctx.state !== "running") {
         this.bgmTimeout = setTimeout(scheduleNext, 250);
         return;
@@ -438,7 +355,7 @@ class RetroAudioEngine {
   }
 
   playToneRaw(freq, duration, type, volume) {
-    if (!this.ctx || this.isPageHidden || document.hidden) return;
+    if (!this.ctx) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -447,13 +364,13 @@ class RetroAudioEngine {
     gain.gain.setValueAtTime(volume, now);
     gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
     osc.connect(gain);
-    gain.connect(this.getOutNode());
+    gain.connect(this.ctx.destination);
     osc.start(now);
     osc.stop(now + duration);
   }
 
   playDrumKick() {
-    if (!this.ctx || this.isPageHidden || document.hidden) return;
+    if (!this.ctx) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -463,13 +380,13 @@ class RetroAudioEngine {
     gain.gain.setValueAtTime(0.06, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
     osc.connect(gain);
-    gain.connect(this.getOutNode());
+    gain.connect(this.ctx.destination);
     osc.start(now);
     osc.stop(now + 0.075);
   }
 
   playSteamChug() {
-    if (!this.ctx || this.isPageHidden || document.hidden) return;
+    if (!this.ctx) return;
     const bufferSize = Math.floor(this.ctx.sampleRate * 0.045);
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -481,7 +398,7 @@ class RetroAudioEngine {
     const gain = this.ctx.createGain();
     gain.gain.setValueAtTime(0.028, this.ctx.currentTime);
     noise.connect(gain);
-    gain.connect(this.getOutNode());
+    gain.connect(this.ctx.destination);
     noise.start();
   }
 
@@ -512,7 +429,7 @@ class RetroAudioEngine {
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
     osc.connect(gain);
-    gain.connect(this.getOutNode());
+    gain.connect(this.ctx.destination);
 
     osc.start(now);
     osc.stop(now + duration);
@@ -584,7 +501,7 @@ class RetroAudioEngine {
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
 
     osc.connect(gain);
-    gain.connect(this.getOutNode());
+    gain.connect(this.ctx.destination);
 
     osc.start(now);
     osc.stop(now + 0.37);

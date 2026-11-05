@@ -239,7 +239,7 @@ body.crt-enabled .crt-scanlines {
   position: fixed;
   inset: 0;
   z-index: 950;
-  background: rgba(10, 6, 18, 0.92);
+  background: #05030a;
   display: flex;
   justify-content: center;
   align-items: center;

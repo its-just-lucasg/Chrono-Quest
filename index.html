@@ -21,12 +21,25 @@
   <div class="crt-scanlines" id="crtOverlay"></div>
   <div class="crt-vignette"></div>
 
-  <!-- Retro Power-On Audio Unlock Overlay -->
+  <!-- Retro Power-On Audio Unlock & Spoiler-Free Time-Lock Overlay -->
   <div class="power-on-overlay" id="arcadePowerOverlay">
-    <div class="power-on-box">
-      <div class="pixel-sub" style="margin-bottom:12px;">★ CHRONO-CAT ARCADE SYSTEM v1.0.3 ★</div>
+    <div class="power-on-box" id="powerOnPromptBox">
+      <div class="pixel-sub" style="margin-bottom:12px;">★ CHRONO-CAT ARCADE SYSTEM v1.0.4 ★</div>
       <div class="power-on-title">⚡ TAP ANYWHERE TO POWER ON ⚡</div>
       <div style="font-size:20px;color:var(--text-muted);margin-top:10px;">Initializes 8-Bit CRT Display &amp; Chiptune Audio</div>
+    </div>
+
+    <div class="power-on-box" id="timeLockBox" style="display:none; max-width:560px; cursor:default;">
+      <div class="pixel-sub" id="timeLockSecretHeader" style="margin-bottom:10px; cursor:pointer; user-select:none;">
+        🔒 CHRONO-LOCK ACTIVE // NO SPOILERS!
+      </div>
+      <div class="power-on-title" style="margin-bottom:14px;">⏳ TEMPORAL COORDINATES SEALED ⏳</div>
+      <div class="birthday-letter" style="text-align:center; margin-bottom:14px; font-size:22px;">No peeking early! This surprise adventure is time-locked and will automatically unlock on:
+
+<strong style="color:var(--accent-gold);">NOVEMBER 17, 2026 AT 12:00 AM</strong></div>
+      <div id="timeLockCountdown" style="font-family:var(--font-pixel); font-size:12px; color:var(--accent-green); background:#0c0816; border:2px solid var(--panel-border); padding:14px; line-height:1.5;">
+        CALCULATING TIME REMAINING...
+      </div>
     </div>
   </div>
 
@@ -123,7 +136,7 @@
       <footer class="title-footer">
         <span>INSERT COIN: FREE FOR REBECCA'S BIRTHDAY!</span>
         <span>TIP: COLLECT ITEMS TO UNLOCK SECRET TIMELINES &amp; ENDINGS</span>
-        <span style="color:var(--accent-secondary);">VER: <span id="appVersionBadge">v1.0.3</span></span>
+        <span style="color:var(--accent-secondary);">VER: <span id="appVersionBadge">v1.0.4</span></span>
       </footer>
     </main>
     <!-- ================= MAIN GAMEPLAY SCREEN ================= -->
@@ -291,10 +304,10 @@
     </div>
   </div>
 
-  <script src="photos-data.js?v=1.0.3"></script>
-  <script src="audio.js?v=1.0.3"></script>
-  <script src="story.js?v=1.0.3"></script>
-  <script src="dlc.js?v=1.0.3"></script>
-  <script src="game.js?v=1.0.3"></script>
+  <script src="photos-data.js?v=1.0.4"></script>
+  <script src="audio.js?v=1.0.4"></script>
+  <script src="story.js?v=1.0.4"></script>
+  <script src="dlc.js?v=1.0.4"></script>
+  <script src="game.js?v=1.0.4"></script>
 </body>
 </html>
