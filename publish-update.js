@@ -67,13 +67,16 @@ function ask(question) {
   );
   fs.writeFileSync(swPath, updatedSw, "utf8");
 
-  // 2. Update index.html version badge
+  // 2. Update index.html version badge & script cache-busters
   if (fs.existsSync(htmlPath)) {
     const htmlContent = fs.readFileSync(htmlPath, "utf8");
-    const updatedHtml = htmlContent.replace(
-      /<span id="appVersionBadge">v[^<]+<\/span>/,
-      `<span id="appVersionBadge">v${targetVer}</span>`
-    );
+    const updatedHtml = htmlContent
+      .replace(
+        /<span id="appVersionBadge">v[^<]+<\/span>/,
+        `<span id="appVersionBadge">v${targetVer}</span>`
+      )
+      .replace(/ARCADE SYSTEM v[\d.]+/g, `ARCADE SYSTEM v${targetVer}`)
+      .replace(/\?v=[\d.]+/g, `?v=${targetVer}`);
     fs.writeFileSync(htmlPath, updatedHtml, "utf8");
   }
 

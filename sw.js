@@ -4,7 +4,7 @@
 // Christmas 2026!) automatically download when online while working 100% offline!
 // ============================================================================
 
-const CACHE_NAME = "rebecca-chrono-quest-v1.0.2"; // Update this version number to force cache refresh on new releases
+const CACHE_NAME = "rebecca-chrono-quest-v1.0.3"; // Update this version number to force cache refresh on new releases
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -20,10 +20,10 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener("install", event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
   );
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
@@ -34,15 +34,14 @@ self.addEventListener("activate", event => {
           if (key !== CACHE_NAME) return caches.delete(key);
         })
       )
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: "no-store" })
       .then(networkResponse => {
         const clone = networkResponse.clone();
         caches.open(CACHE_NAME).then(cache => {
@@ -50,6 +49,6 @@ self.addEventListener("fetch", event => {
         });
         return networkResponse;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request, { ignoreSearch: true }))
   );
 });

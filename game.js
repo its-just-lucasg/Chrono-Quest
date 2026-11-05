@@ -1242,8 +1242,30 @@ class ChronoQuestGame {
 
     // Register Offline & Auto-Update Service Worker
     if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+      navigator.serviceWorker.register("./sw.js").then(reg => {
+        reg.update().catch(() => {});
+      }).catch(() => {});
     }
+
+    // Retro Power-On Overlay & Audio Unlock (guarantees Title Screen music starts immediately on tap!)
+    const powerOverlay = document.getElementById("arcadePowerOverlay");
+    const dismissPowerOverlay = () => {
+      window.retroAudio.init();
+      window.retroAudio.playSelect();
+      if (powerOverlay) powerOverlay.style.display = "none";
+    };
+    if (powerOverlay) {
+      powerOverlay.addEventListener("click", dismissPowerOverlay);
+      powerOverlay.addEventListener("touchend", e => {
+        e.preventDefault();
+        dismissPowerOverlay();
+      }, { passive: false });
+    }
+    window.addEventListener("keydown", () => {
+      if (powerOverlay && powerOverlay.style.display !== "none") {
+        dismissPowerOverlay();
+      }
+    }, { once: true });
 
     // Header buttons
     document.getElementById("btnPhotoGallery").addEventListener("click", () => this.openModal("modalPhotoGallery"));

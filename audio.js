@@ -236,6 +236,7 @@ window.ZONE_SOUNDTRACKS = {
 class RetroAudioEngine {
   constructor() {
     this.ctx = null;
+    this.masterGain = null;
     this.enabled = true;      // SFX enabled
     this.musicEnabled = true; // Background chiptune music enabled
     this.currentTrackName = "happy_birthday";
@@ -247,11 +248,20 @@ class RetroAudioEngine {
     this.bindLifecycleEvents();
   }
 
+  getOutNode() {
+    return this.masterGain || (this.ctx ? this.ctx.destination : null);
+  }
+
   bindLifecycleEvents() {
     const handleHide = () => {
       this.isPageHidden = true;
       this.stopMusicLoop();
       this.stopSong();
+      if (this.masterGain && this.ctx) {
+        try {
+          this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
+        } catch (e) {}
+      }
       if (this.ctx && this.ctx.state === "running") {
         this.ctx.suspend().catch(() => {});
       }
@@ -260,6 +270,11 @@ class RetroAudioEngine {
     const handleShow = () => {
       if (document.hidden) return;
       this.isPageHidden = false;
+      if (this.masterGain && this.ctx) {
+        try {
+          this.masterGain.gain.setValueAtTime(1, this.ctx.currentTime);
+        } catch (e) {}
+      }
       if (this.ctx && this.ctx.state === "suspended" && (this.musicEnabled || this.enabled)) {
         this.ctx.resume().catch(() => {});
       }
@@ -273,29 +288,36 @@ class RetroAudioEngine {
       else handleShow();
     });
     window.addEventListener("pagehide", handleHide);
-    window.addEventListener("blur", () => {
-      // On mobile/Android, locking the screen or switching apps triggers blur/visibilitychange
-      if (document.hidden) handleHide();
-    });
+    document.addEventListener("freeze", handleHide);
+    // Unconditionally mute & suspend on window blur (locking phone screen or switching apps)
+    window.addEventListener("blur", handleHide);
     window.addEventListener("focus", handleShow);
   }
 
   init() {
-    if (this.isPageHidden || document.hidden) return;
+    if (document.hidden) return;
+    this.isPageHidden = false;
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.setValueAtTime(1, this.ctx.currentTime);
+        this.masterGain.connect(this.ctx.destination);
       }
     }
     if (this.ctx) {
+      if (this.masterGain) {
+        try {
+          this.masterGain.gain.setValueAtTime(1, this.ctx.currentTime);
+        } catch (e) {}
+      }
       if (this.ctx.state === "suspended") {
-        // Play a 1-sample silent buffer to unlock mobile WebKit/Blink hardware audio on touch
         try {
           const buf = this.ctx.createBuffer(1, 1, 22050);
           const src = this.ctx.createBufferSource();
           src.buffer = buf;
-          src.connect(this.ctx.destination);
+          src.connect(this.getOutNode());
           src.start(0);
         } catch (e) {}
         this.ctx.resume().then(() => {
@@ -376,6 +398,12 @@ class RetroAudioEngine {
 
     const scheduleNext = () => {
       if (!this.musicEnabled || this.isPageHidden || document.hidden) return;
+      if (typeof document.hasFocus === "function" && !document.hasFocus()) {
+        this.isPageHidden = true;
+        this.stopMusicLoop();
+        if (this.ctx && this.ctx.state === "running") this.ctx.suspend().catch(() => {});
+        return;
+      }
       if (this.isPlayingSong || !this.ctx || this.ctx.state !== "running") {
         this.bgmTimeout = setTimeout(scheduleNext, 250);
         return;
@@ -410,7 +438,7 @@ class RetroAudioEngine {
   }
 
   playToneRaw(freq, duration, type, volume) {
-    if (!this.ctx) return;
+    if (!this.ctx || this.isPageHidden || document.hidden) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -419,13 +447,13 @@ class RetroAudioEngine {
     gain.gain.setValueAtTime(volume, now);
     gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.getOutNode());
     osc.start(now);
     osc.stop(now + duration);
   }
 
   playDrumKick() {
-    if (!this.ctx) return;
+    if (!this.ctx || this.isPageHidden || document.hidden) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -435,13 +463,13 @@ class RetroAudioEngine {
     gain.gain.setValueAtTime(0.06, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.getOutNode());
     osc.start(now);
     osc.stop(now + 0.075);
   }
 
   playSteamChug() {
-    if (!this.ctx) return;
+    if (!this.ctx || this.isPageHidden || document.hidden) return;
     const bufferSize = Math.floor(this.ctx.sampleRate * 0.045);
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -453,7 +481,7 @@ class RetroAudioEngine {
     const gain = this.ctx.createGain();
     gain.gain.setValueAtTime(0.028, this.ctx.currentTime);
     noise.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.getOutNode());
     noise.start();
   }
 
@@ -484,7 +512,7 @@ class RetroAudioEngine {
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.getOutNode());
 
     osc.start(now);
     osc.stop(now + duration);
@@ -556,7 +584,7 @@ class RetroAudioEngine {
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
 
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.getOutNode());
 
     osc.start(now);
     osc.stop(now + 0.37);

@@ -235,6 +235,35 @@ body.crt-enabled .crt-scanlines {
   50% { box-shadow: 3px 3px 0 #000, 0 0 18px rgba(241, 250, 140, 0.75); }
 }
 
+.power-on-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(10, 6, 18, 0.92);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 20px;
+}
+
+.power-on-box {
+  background: #171226;
+  border: 4px solid var(--accent-gold);
+  box-shadow: 0 0 0 4px #000, 0 0 36px rgba(255, 121, 198, 0.55);
+  padding: 28px 32px;
+  text-align: center;
+  max-width: 480px;
+  animation: pulseGlow 1.6s infinite;
+}
+
+.power-on-title {
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  color: var(--accent-primary);
+  line-height: 1.5;
+}
+
 body.on-splash .ingame-only-btn {
   display: none !important;
 }
