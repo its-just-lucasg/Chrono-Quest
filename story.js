@@ -77,7 +77,7 @@ window.PHOTO_SCRAPBOOK_LIST = [
 ];
 window.ITEMS_CATALOG = {
   iced_coffee: {
-    name: "Guatemala Antingua Coffee",
+    name: "Guatemala Antigua Coffee",
     icon: "☕",
     desc: "Brewed to perfection. Restores 100% energy across all timelines."
   },
