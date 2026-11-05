@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#171226" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>REBECCA'S CHRONO-QUEST: A Birthday Time-Travel Adventure</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-birthday crt-enabled on-splash">
+  <!-- CRT Overlay Effects -->
+  <div class="crt-scanlines" id="crtOverlay"></div>
+  <div class="crt-vignette"></div>
+
+  <div class="arcade-cabinet">
+    <!-- Top Retro Marquee / Console Header -->
+    <header class="console-header">
+      <div class="brand-badge">
+        <span class="led-dot" id="powerLed"></span>
+        <span class="console-title">CHRONO-CAT // <span id="nowPlayingBadge" style="color:var(--accent-gold);">✨ STARLIGHT TITLE SCREEN</span></span>
+      </div>
+      <div class="header-controls">
+        <button class="retro-btn small-btn ingame-only-btn" id="btnPhotoGallery" title="View 8-Bit Memory Photo Gallery">
+          📷 GALLERY (<span id="galleryCountHud">0/11</span>)
+        </button>
+        <button class="retro-btn small-btn ingame-only-btn" id="btnCatDex" title="View the Cat Party Stats">
+          🐾 CAT-DEX
+        </button>
+        <button class="retro-btn small-btn ingame-only-btn" id="btnEndings" title="View Unlocked Endings">
+          🏆 ENDINGS (<span id="endingsCountHud">0/8</span>)
+        </button>
+        <button class="retro-btn small-btn ingame-only-btn" id="btnDlcTop" title="View Expansion Cartridges & DLC">
+          💿 DLC
+        </button>
+        <button class="retro-btn small-btn" id="btnMusicToggle" title="Toggle 8-Bit Chiptune Soundtrack">
+          🎵 BGM: ON
+        </button>
+        <button class="retro-btn small-btn" id="btnAudioToggle" title="Toggle 8-Bit Sound Effects">
+          🔊 SFX: ON
+        </button>
+        <button class="retro-btn small-btn" id="btnCrtToggle" title="Toggle CRT Scanlines">
+          📺 CRT: ON
+        </button>
+      </div>
+    </header>
+
+    <!-- ================= TITLE SCREEN ================= -->
+    <main id="titleScreen" class="screen active">
+      <div class="title-banner">
+        <div class="pixel-sub">★ LUCAS PRESENTS A BIRTHDAY ORIGINAL ★</div>
+        <h1 class="game-logo">REBECCA'S<br><span class="logo-accent">CHRONO-QUEST</span></h1>
+        <div class="title-tagline">Through Time, Space, Coffee, Pasta &amp; Four Legendary Cats</div>
+      </div>
+
+      <div class="title-viewport-wrap">
+        <canvas id="titleCanvas" width="560" height="230" class="pixel-canvas"></canvas>
+      </div>
+
+      <div class="title-party-strip">
+        <div class="party-mini-card" data-cat="jinny">
+          <span class="cat-icon">🧡</span>
+          <div>
+            <strong>JINNY</strong>
+            <small>Lv.99 Food Critic</small>
+          </div>
+        </div>
+        <div class="party-mini-card" data-cat="joonie">
+          <span class="cat-icon">🤍</span>
+          <div>
+            <strong>JOONIE</strong>
+            <small>Lv.99 Cuddle Bug</small>
+          </div>
+        </div>
+        <div class="party-mini-card" data-cat="billie">
+          <span class="cat-icon">🌟</span>
+          <div>
+            <strong>BILLIE</strong>
+            <small>Lv.∞ Star Guardian</small>
+          </div>
+        </div>
+        <div class="party-mini-card" data-cat="tommy">
+          <span class="cat-icon">🚂</span>
+          <div>
+            <strong>TOMMY</strong>
+            <small>Lv.99 Choo-Choo</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="title-actions">
+        <button class="retro-btn primary-btn pulse-btn" id="btnStartGame">
+          ▶ START NEW ADVENTURE
+        </button>
+        <button class="retro-btn secondary-btn" id="btnContinueGame" style="display:none;">
+          ⏩ CONTINUE ADVENTURE
+        </button>
+        <button class="retro-btn" id="btnDlcSplash">
+          💿 EXPANSIONS / DLC
+        </button>
+        <button class="retro-btn secondary-btn" id="btnInstallPwa" style="display:none;">
+          📲 INSTALL ANDROID APP
+        </button>
+      </div>
+
+      <footer class="title-footer">
+        <span>INSERT COIN: FREE FOR REBECCA'S BIRTHDAY!</span>
+        <span>TIP: COLLECT ITEMS TO UNLOCK SECRET TIMELINES &amp; ENDINGS</span>
+      </footer>
+    </main>
+    <!-- ================= MAIN GAMEPLAY SCREEN ================= -->
+    <main id="gameScreen" class="screen">
+      <section class="status-hud">
+        <div class="hud-stat">
+          <span class="hud-label">ERA / TIMELINE</span>
+          <span class="hud-value" id="hudEra">2026 // BIRTHDAY MORNING</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-label">LOCATION</span>
+          <span class="hud-value" id="hudLocation">HOME SWEET HOME</span>
+        </div>
+        <div class="hud-stat meter-stat">
+          <span class="hud-label">☕ COFFEE METER</span>
+          <div class="progress-bar">
+            <div class="progress-fill coffee-fill" id="hudCoffeeBar" style="width: 80%;"></div>
+          </div>
+        </div>
+        <div class="hud-stat meter-stat">
+          <span class="hud-label">❤️ LOVE &amp; PASTA</span>
+          <div class="progress-bar">
+            <div class="progress-fill love-fill" id="hudLoveBar" style="width: 100%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="game-grid">
+        <aside class="scene-column">
+          <div class="scene-frame">
+            <div class="scene-frame-header">
+              <span id="sceneBadge">CHAPTER 1</span>
+              <button class="pixel-mode-btn" id="btnPixelMode" title="Click to cycle between 16-Bit Retro, Chunky 8-Bit, and Original Photo!">
+                👾 VIEW: 16-BIT RETRO
+              </button>
+              <span id="sceneYearTag">YR: 2026</span>
+            </div>
+            <canvas id="sceneCanvas" width="460" height="280" class="pixel-canvas" title="Click image to toggle 8-Bit / Original Photo"></canvas>
+            <div class="scene-caption" id="sceneCaption">A mysterious glowing package sits beside your morning coffee...</div>
+          </div>
+
+          <div class="inventory-panel">
+            <div class="panel-header">
+              <span>🎒 CHRONO-POCKET INVENTORY</span>
+              <span id="inventoryCount">0 ITEMS</span>
+            </div>
+            <div class="inventory-slots" id="inventoryList">
+              <div class="empty-inventory">No souvenirs collected yet! Explore timelines to find items.</div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="story-column">
+          <div class="story-box" id="storyBox" title="Click or press Space to finish typing">
+            <div class="story-chapter-title" id="storyTitle">Prologue: The Birthday Chrono-Watch</div>
+            <div class="story-text" id="storyText"></div>
+            <div class="typing-indicator" id="typingIndicator">▼ CLICK OR PRESS [SPACE] TO FAST-FORWARD TEXT ▼</div>
+          </div>
+
+          <div class="item-toast" id="itemToast" style="display:none;"></div>
+
+          <div class="choices-container">
+            <div class="choices-header">CHOOSE YOUR PATH:</div>
+            <div class="choices-list" id="choicesList"></div>
+          </div>
+
+          <div class="bottom-bar">
+            <button class="retro-btn small-btn" id="btnBackChoice" title="Undo last step">⏪ REWIND 1 STEP</button>
+            <button class="retro-btn small-btn" id="btnRestartStory">🔄 NEW TIMELINE RUN</button>
+            <button class="retro-btn small-btn" id="btnHomeTitle">🏠 TITLE SCREEN</button>
+          </div>
+        </section>
+      </div>
+    </main>
+    <!-- ================= MODALS ================= -->
+    <div class="modal-backdrop" id="modalCatDex" style="display:none;">
+      <div class="retro-modal">
+        <div class="modal-header">
+          <h2>🐾 OFFICIAL FELINE PARTY ROSTER (CAT-DEX)</h2>
+          <button class="close-modal-btn" data-close="modalCatDex">✕</button>
+        </div>
+        <div class="modal-body" id="catDexContent"></div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="modalEndings" style="display:none;">
+      <div class="retro-modal">
+        <div class="modal-header">
+          <h2>🏆 MULTIVERSE ENDINGS LOG</h2>
+          <button class="close-modal-btn" data-close="modalEndings">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-intro">Discover all 7 endings across space and time! Unlocked endings are saved automatically.</p>
+          <div class="endings-grid" id="endingsGrid"></div>
+          <div class="modal-footer-actions">
+            <button class="retro-btn small-btn danger-btn" id="btnResetProgress">🗑 RESET SAVED PROGRESS</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="modalBirthdayCard" style="display:none;">
+      <div class="retro-modal card-modal">
+        <div class="modal-header">
+          <h2>💌 HAPPY BIRTHDAY REBECCA!</h2>
+          <button class="close-modal-btn" data-close="modalBirthdayCard">✕</button>
+        </div>
+        <div class="modal-body" id="birthdayCardContent"></div>
+      </div>
+    </div>
+
+    <!-- 8-Bit Photo Gallery Modal -->
+    <div class="modal-backdrop" id="modalPhotoGallery" style="display:none;">
+      <div class="retro-modal" style="max-width: 860px;">
+        <div class="modal-header">
+          <h2>📷 8-BIT MEMORY SCRAPBOOK (2021–2026)</h2>
+          <button class="close-modal-btn" data-close="modalPhotoGallery">✕</button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+            <p class="modal-intro" style="margin:0;">Click any photo card to flip between 8-Bit Retro Pixel Art and the Original Photo!</p>
+            <button class="retro-btn small-btn" id="btnToggleAllGalleryMode">🔄 FLIP ALL TO ORIGINAL / 8-BIT</button>
+          </div>
+          <div class="photo-gallery-grid" id="photoGalleryContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boos Morning Warning Modal -->
+    <div class="modal-backdrop" id="modalBoosWarning" style="display:none;">
+      <div class="retro-modal" style="max-width: 580px;">
+        <div class="modal-header">
+          <h2>⚠️ WAIT! BEFORE YOU TIME JUMP...</h2>
+          <button class="close-modal-btn" data-close="modalBoosWarning">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="birthday-letter" style="margin-bottom: 14px;">Once you time jump, you can't come back to Birthday Morning until the adventure is complete!
+
+<strong style="color:var(--accent-gold);">Make sure you have checked on all the boos first!</strong> (And grabbed your morning coffee &amp; given the boos their foos!)</div>
+          <div id="boosRemainingList" style="margin-bottom: 16px; font-size: 20px; color: var(--accent-secondary);"></div>
+          <div class="form-actions" style="justify-content: space-between;">
+            <button type="button" class="retro-btn primary-btn" id="btnStayMorning">
+              🐾 GO BACK &amp; CHECK ON THE BOOS
+            </button>
+            <button type="button" class="retro-btn danger-btn" id="btnConfirmJump">
+              ⚡ TIME JUMP ANYWAY
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DLC / Expansion Cartridges Modal -->
+    <div class="modal-backdrop" id="modalDlc" style="display:none;">
+      <div class="retro-modal">
+        <div class="modal-header">
+          <h2>💿 CHRONO-QUEST EXPANSION CARTRIDGES (DLC)</h2>
+          <button class="close-modal-btn" data-close="modalDlc">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-intro">New holiday &amp; anniversary adventure cartridges download automatically to this app when released!</p>
+          <div id="dlcGrid" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="photos-data.js"></script>
+  <script src="audio.js"></script>
+  <script src="story.js"></script>
+  <script src="dlc.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
