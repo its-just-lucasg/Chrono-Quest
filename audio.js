@@ -16,31 +16,36 @@ const N = {
 // Format of each step in sequence: [leadNote, harmNote, bassNote, drumType, beats]
 // drumType: 0 = none, 1 = kick, 2 = snare/hihat, 3 = steam-chug
 window.ZONE_SOUNDTRACKS = {
-  // 1. TITLE & BIRTHDAY MORNING: Authentic 8-Bit "Happy Birthday to You" Waltz!
+  // 1. MAIN THEME (Lock Screen, Title Screen & Birthday Morning): "✨ STARLIGHT TITLE SCREEN"
   happy_birthday: {
-    label: "🎂 8-BIT HAPPY BIRTHDAY",
-    unitMs: 190,
-    leadWave: "square",
-    harmWave: "triangle",
+    label: "✨ STARLIGHT TITLE SCREEN",
+    unitMs: 180, // Relaxed, breathing tempo (~83 BPM per quarter beat)
+    leadWave: "triangle", // Soft, warm tones without harsh edges
+    harmWave: "sine",     // Smooth ambient pad backing
     steps: [
-      // "Hap-py birth-day to you..."
-      ["C5", "E4", "C3", 1, 1], ["C5", "E4", "_",  0, 1],
-      ["D5", "F4", "G3", 2, 2], ["C5", "E4", "G3", 2, 2],
-      ["F5", "A4", "C3", 1, 2], ["E5", "G4", "G3", 2, 3], ["_", "_", "G3", 0, 1],
-      // "Hap-py birth-day to you..."
-      ["C5", "E4", "G3", 1, 1], ["C5", "E4", "_",  0, 1],
-      ["D5", "F4", "G3", 2, 2], ["C5", "E4", "B2", 2, 2],
-      ["G5", "B4", "C3", 1, 2], ["F5", "A4", "F3", 2, 3], ["_", "_", "C3", 0, 1],
-      // "Hap-py birth-day dear Re-bec-ca..."
-      ["C5", "E4", "C3", 1, 1], ["C5", "E4", "_",  0, 1],
-      ["C6", "E5", "E3", 2, 2], ["A5", "C5", "F3", 1, 2],
-      ["F5", "A4", "C3", 2, 2], ["E5", "G4", "A3", 1, 2],
-      ["D5", "Fs4","D3", 2, 3], ["_",  "_",  "A3", 0, 1],
-      // "Hap-py birth-day to you!" + Chiptune Arpeggio Turnaround
-      ["Bb5","D5", "Bb2",1, 1], ["Bb5","D5", "_",  0, 1],
-      ["A5", "C5", "F3", 2, 2], ["F5", "A4", "A3", 2, 2],
-      ["G5", "B4", "G3", 1, 2], ["F5", "A4", "F3", 2, 2],
-      ["A5", "C5", "C3", 1, 1], ["C6", "F5", "F3", 2, 2], ["_", "_", "_", 0, 1]
+      // --- BAR 1: C Major (Warm Opening Arpeggio) ---
+      ["E5", "G4", "C3", 0, 2], ["G5", "C5", "_",  0, 2],
+      ["C6", "E5", "E3", 0, 2], ["B5", "D5", "_",  0, 2],
+      ["A5", "C5", "G3", 0, 2], ["G5", "B4", "_",  0, 2],
+      ["E5", "G4", "C3", 3, 2], ["D5", "F4", "_",  0, 2],
+
+      // --- BAR 2: A Minor (Gentle, Reflective Descent) ---
+      ["C5", "E4", "A2", 0, 2], ["E5", "A4", "_",  0, 2],
+      ["A5", "C5", "C3", 0, 2], ["G5", "B4", "_",  0, 2],
+      ["E5", "A4", "E3", 0, 2], ["D5", "G4", "_",  0, 2],
+      ["C5", "E4", "A2", 3, 2], ["B4", "D4", "_",  0, 2],
+
+      // --- BAR 3: F Major 7 (Dreamy, Floating Feel) ---
+      ["A4", "C4", "F2", 0, 2], ["C5", "E4", "_",  0, 2],
+      ["E5", "G4", "A2", 0, 2], ["F5", "A4", "_",  0, 2],
+      ["E5", "G4", "C3", 0, 2], ["D5", "F4", "_",  0, 2],
+      ["C5", "E4", "F2", 3, 2], ["D5", "F4", "_",  0, 2],
+
+      // --- BAR 4: G Dominant -> Quiet Resolution (Loops back to Bar 1) ---
+      ["D5", "G4", "G2", 0, 2], ["F5", "B4", "_",  0, 2],
+      ["G5", "D5", "B2", 0, 2], ["F5", "B4", "_",  0, 2],
+      ["E5", "G4", "D3", 0, 2], ["D5", "F4", "_",  0, 2],
+      ["C5", "E4", "G2", 3, 2], ["B4", "D4", "_",  0, 2]
     ]
   },
 
