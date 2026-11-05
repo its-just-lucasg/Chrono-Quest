@@ -1284,14 +1284,16 @@ class ChronoQuestGame {
       });
     }
 
-    // Start 8-bit chiptune soundtrack on first user interaction anywhere on page
-    const unlockAudioOnce = () => {
+    // Attempt immediate autoplay on launch, and also listen for any touch/click until AudioContext is running
+    window.retroAudio.init();
+    const unlockEvents = ["touchstart", "touchend", "pointerdown", "mousedown", "click", "keydown"];
+    const unlockAudio = () => {
       window.retroAudio.init();
-      window.removeEventListener("pointerdown", unlockAudioOnce);
-      window.removeEventListener("keydown", unlockAudioOnce);
+      if (window.retroAudio.ctx && window.retroAudio.ctx.state === "running") {
+        unlockEvents.forEach(evt => document.removeEventListener(evt, unlockAudio, true));
+      }
     };
-    window.addEventListener("pointerdown", unlockAudioOnce);
-    window.addEventListener("keydown", unlockAudioOnce);
+    unlockEvents.forEach(evt => document.addEventListener(evt, unlockAudio, { capture: true, passive: true }));
 
     const btnAudio = document.getElementById("btnAudioToggle");
     btnAudio.addEventListener("click", () => {

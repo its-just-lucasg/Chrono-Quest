@@ -242,21 +242,71 @@ class RetroAudioEngine {
     this.bgmTimeout = null;
     this.stepIndex = 0;
     this.isPlayingSong = false;
+    this.isPageHidden = false;
     this.songTimeouts = [];
+    this.bindLifecycleEvents();
+  }
+
+  bindLifecycleEvents() {
+    const handleHide = () => {
+      this.isPageHidden = true;
+      this.stopMusicLoop();
+      this.stopSong();
+      if (this.ctx && this.ctx.state === "running") {
+        this.ctx.suspend().catch(() => {});
+      }
+    };
+
+    const handleShow = () => {
+      if (document.hidden) return;
+      this.isPageHidden = false;
+      if (this.ctx && this.ctx.state === "suspended" && (this.musicEnabled || this.enabled)) {
+        this.ctx.resume().catch(() => {});
+      }
+      if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong && this.ctx) {
+        this.startMusic(this.currentTrackName);
+      }
+    };
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) handleHide();
+      else handleShow();
+    });
+    window.addEventListener("pagehide", handleHide);
+    window.addEventListener("blur", () => {
+      // On mobile/Android, locking the screen or switching apps triggers blur/visibilitychange
+      if (document.hidden) handleHide();
+    });
+    window.addEventListener("focus", handleShow);
   }
 
   init() {
+    if (this.isPageHidden || document.hidden) return;
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
     }
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume();
-    }
-    if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong) {
-      this.startMusic(this.currentTrackName);
+    if (this.ctx) {
+      if (this.ctx.state === "suspended") {
+        // Play a 1-sample silent buffer to unlock mobile WebKit/Blink hardware audio on touch
+        try {
+          const buf = this.ctx.createBuffer(1, 1, 22050);
+          const src = this.ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(this.ctx.destination);
+          src.start(0);
+        } catch (e) {}
+        this.ctx.resume().then(() => {
+          if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong && !this.isPageHidden) {
+            this.startMusic(this.currentTrackName);
+          }
+        }).catch(() => {});
+      }
+      if (this.musicEnabled && !this.bgmTimeout && !this.isPlayingSong) {
+        this.startMusic(this.currentTrackName);
+      }
     }
   }
 
@@ -325,7 +375,7 @@ class RetroAudioEngine {
     this.currentTrackName = trackName;
 
     const scheduleNext = () => {
-      if (!this.musicEnabled) return;
+      if (!this.musicEnabled || this.isPageHidden || document.hidden) return;
       if (this.isPlayingSong || !this.ctx || this.ctx.state !== "running") {
         this.bgmTimeout = setTimeout(scheduleNext, 250);
         return;

@@ -4,7 +4,7 @@
 // Christmas 2026!) automatically download when online while working 100% offline!
 // ============================================================================
 
-const CACHE_NAME = "rebecca-chrono-quest-v1.0.1"; // Update this version number to force cache refresh on new releases
+const CACHE_NAME = "rebecca-chrono-quest-v1.0.2"; // Update this version number to force cache refresh on new releases
 const CORE_ASSETS = [
   "./",
   "./index.html",
